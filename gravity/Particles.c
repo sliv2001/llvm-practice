@@ -6,6 +6,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "Particles.h"
 
 #define RANDOM_RANGE(from, to)	rand()%((to)-(from))+(from);
@@ -22,6 +23,12 @@ int initAll(Particles *p, Number n, Radius r_max, int x, int y) {
 		return res;
 	return 0;
 }
+
+static bool exists(Particle *p) {
+	return p->exists;
+}
+
+/*TODO add definitions for all local functions*/
 
 int initParticles(Particles *p, Number n, Radius r_max) {
 	if (p->number == 0)
@@ -40,6 +47,7 @@ int initParticles(Particles *p, Number n, Radius r_max) {
 		p->base[i].origin.y = RANDOM_RANGE(r, window.y - r - 1)
 		;
 		memset(&p->base[i].velocity, 0, sizeof(Velocity));
+		p->base[i].exists = true;
 	}
 	p->number = nc;
 	return 0;
@@ -65,6 +73,8 @@ void drawCircle(Origin o, Radius r, Brightness b) {
 
 int drawParticles(Particles *p) {
 	for (int n = 0; n < p->number; n++) {
+		if (!exists(&p->base[n]))
+			continue;
 		Origin o = p->base[n].origin;
 		Radius r = p->base[n].radius;
 		drawCircle(o, r, MAX_BRIGHTNESS);
@@ -74,14 +84,22 @@ int drawParticles(Particles *p) {
 
 static int setAcceleration(Particles *p) {
 	for (int i = 0; i < p->number; i++) {
+		if (!exists(&p->base[i]))
+			continue;
 		for (int k = i + 1; k < p->number; k++) {
+			if (!exists(&p->base[k]))
+				continue;
 			Particle *p1 = &p->base[i], *p2 = &p->base[k];
 			int distanceX = p2->origin.x - p1->origin.x;
 			int distanceY = p2->origin.y - p1->origin.y;
-			p1->accel.x = SIGN(distanceX)*GRAVITY_CONSTANT * p2->radius / (SQ(distanceX));
-			p2->accel.x = -1*SIGN(distanceX)*GRAVITY_CONSTANT * p1->radius / (SQ(distanceX));
-			p1->accel.y = SIGN(distanceX)*GRAVITY_CONSTANT * p2->radius / (SQ(distanceY));
-			p2->accel.y = -1*SIGN(distanceX)*GRAVITY_CONSTANT * p1->radius / (SQ(distanceY));
+			p1->accel.x = SIGN(distanceX) * GRAVITY_CONSTANT * p2->radius
+					/ (SQ(distanceX));
+			p2->accel.x = -1 * SIGN(distanceX) * GRAVITY_CONSTANT * p1->radius
+					/ (SQ(distanceX));
+			p1->accel.y = SIGN(distanceX) * GRAVITY_CONSTANT * p2->radius
+					/ (SQ(distanceY));
+			p2->accel.y = -1 * SIGN(distanceX) * GRAVITY_CONSTANT * p1->radius
+					/ (SQ(distanceY));
 		}
 	}
 	return 0;
@@ -90,19 +108,23 @@ static int setAcceleration(Particles *p) {
 static int checkBorderIntersection(Particle *p) {
 	Origin o = p->origin;
 	Radius r = p->radius;
+	if (!exists(p))
+		return 0;
 	if (o.x <= r && p->velocity.x < 0)
-		p->velocity->x *= -1;
+		p->velocity.x *= -1;
 	if (o.x + r >= window.x && p->velocity.x > 0)
-		p->velocity->x *= -1;
+		p->velocity.x *= -1;
 	if (o.y <= r && p->velocity.y < 0)
-		p->velocity->y *= -1;
+		p->velocity.y *= -1;
 	if (o.y + r >= window.y && p->velocity.y > 0)
-		p->velocity->y *= -1;
+		p->velocity.y *= -1;
 	return 0;
 }
 
 static int setVelocity(Particles *p) {
 	for (int i = 0; i < p->number; i++) {
+		if (!exists(&p->base[i]))
+			continue;
 		p->base[i].velocity.x += p->base[i].accel.x;
 		p->base[i].velocity.y += p->base[i].accel.y;
 		checkBorderIntersection(&p->base[i]);
@@ -112,19 +134,54 @@ static int setVelocity(Particles *p) {
 
 /*TODO Add checks if particle passed through another*/
 
-static int setOrigin(Particles *p){
+static int setOrigin(Particles *p) {
 
-	for (int i=0; i< p->number; i++){
-		p->base[i].origin.x+=p->base[i].velocity.x;
-		p->base[i].origin.y+=p->base[i].velocity.y;
+	for (int i = 0; i < p->number; i++) {
+		if (!exists(&p->base[i]))
+			continue;
+		p->base[i].origin.x += p->base[i].velocity.x;
+		p->base[i].origin.y += p->base[i].velocity.y;
 	}
 
 	return 0;
 }
 
-static int mergeParticles(Particles* p){
+static bool intersectParticles(Particle *p1, Particle *p2) {
+	int rsum = p1->radius + p2->radius, dx = p2->origin.x - p1->origin.x, dy =
+			p2->origin.y - p1->origin.y;
+	return (dx * dx + dy * dy) <= (rsum * rsum);
+}
 
+static int approxSQRT_ofSum(int x, int y) {
+	int ratio1 = x / y;
+	int average1 = y + (y * ratio1 * ratio1) / 2
+			- (y * ratio1 * ratio1 * ratio1 * ratio1) / 8;
+	int ratio2 = y / x;
+	int average2 = x + (x * ratio2 * ratio2) / 2
+			- (x * ratio2 * ratio2 * ratio2 * ratio2) / 8;
+	return (average1 + average2) / 2;
+}
 
+static int mergeParticle(Particle *p1, Particle *p2) {
+	int newRadius = approxSQRT_ofSum(p1->radius, p2->radius);
+	p1->radius = newRadius;
+	p2->exists=false;
+	return 0;
+}
+
+static int mergeParticles(Particles *p) {
+
+	for (int i = 0; i < p->number; i++) {
+		if (!exists(&p->base[i]))
+			continue;
+		for (int k = i + 1; i < p->number; i++) {
+			if (!exists(&p->base[k]))
+				continue;
+			Particle *p1 = &p->base[i], *p2 = &p->base[k];
+			if (intersectParticles(p1, p2))
+				mergeParticle(p1, p2);
+		}
+	}
 
 	return 0;
 }

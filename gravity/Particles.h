@@ -9,6 +9,7 @@
 #define PARTICLES_H_
 
 #include "drawManager.h"
+#include <stdbool.h>
 
 #define	MAX_SIZE_OF_PARTICLES			1000
 #define DEFAULT_NUMBER_OF_PARTICLES		25
@@ -34,6 +35,7 @@ struct Particle {
 	Velocity velocity;
 	Acceleration accel;
 	Radius radius;
+	bool exists;
 };
 typedef struct Particle Particle;
 
