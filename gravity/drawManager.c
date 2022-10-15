@@ -6,6 +6,7 @@
  */
 
 #include <SDL.h>
+#include <stdio.h>
 #include "drawManager.h"
 
 /*TODO check all possible errors*/
@@ -43,6 +44,8 @@ int initDrawManager(Canva *c, int x, int y, char *windowCaption) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
+	c->x = xc;
+	c->y = yc;
 	return res;
 }
 
@@ -56,6 +59,7 @@ int flush() {
 	SDL_RenderPresent(renderer);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
+	SDL_Delay(1000);
 	return 0;
 }
 

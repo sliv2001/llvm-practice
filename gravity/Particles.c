@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "Particles.h"
 
 #define RANDOM_RANGE(from, to)	rand()%((to)-(from))+(from);
@@ -24,6 +25,12 @@ int initAll(Particles *p, Number n, Radius r_max, int x, int y) {
 	return 0;
 }
 
+int freeAll(Particles* p){
+	freeDrawManager();
+	freeParticles(p);
+	return 0;
+}
+
 static bool exists(Particle *p) {
 	return p->exists;
 }
@@ -31,21 +38,16 @@ static bool exists(Particle *p) {
 /*TODO add definitions for all local functions*/
 
 int initParticles(Particles *p, Number n, Radius r_max) {
-	if (p->number == 0)
-		return 0;
 	int nc = n ? n : DEFAULT_NUMBER_OF_PARTICLES;
 	int r_maxc = r_max ? r_max : DEFAULT_MAXIMUM_RADIUS;
 	if (nc > MAX_SIZE_OF_PARTICLES)
 		return -1;
 	p->base = (Particle*) malloc(nc * sizeof(Particle));
 	for (int i = 0; i < nc; i++) {
-		int r = RANDOM_RANGE(2, r_maxc)
-		;
+		int r = RANDOM_RANGE(2, r_maxc);
 		p->base[i].radius = r;
-		p->base[i].origin.x = RANDOM_RANGE(r, window.x - r - 1)
-		;
-		p->base[i].origin.y = RANDOM_RANGE(r, window.y - r - 1)
-		;
+		p->base[i].origin.x = RANDOM_RANGE(r, window.x - r - 1);
+		p->base[i].origin.y = RANDOM_RANGE(r, window.y - r - 1);
 		memset(&p->base[i].velocity, 0, sizeof(Velocity));
 		p->base[i].exists = true;
 	}
@@ -79,6 +81,7 @@ int drawParticles(Particles *p) {
 		Radius r = p->base[n].radius;
 		drawCircle(o, r, MAX_BRIGHTNESS);
 	}
+	flush();
 	return 0;
 }
 

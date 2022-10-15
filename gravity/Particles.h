@@ -14,9 +14,9 @@
 #define	MAX_SIZE_OF_PARTICLES			1000
 #define DEFAULT_NUMBER_OF_PARTICLES		25
 #define DEFAULT_MAXIMUM_RADIUS			4
-#define MAX_BRIGHTNESS					1000
+#define MAX_BRIGHTNESS					255
 #define DEFAULT_WINDOW_CAPTION			"Gravity"
-#define GRAVITY_CONSTANT				1
+#define GRAVITY_CONSTANT				50
 
 struct Vector {
 	int x;
@@ -57,6 +57,15 @@ typedef struct Particles Particles;
  * @return 0 in case of success
  */
 int initAll(Particles *p, Number n, Radius r_max, int x, int y);
+
+/**
+ * @fn int freeAll(Particles*)
+ * @brief Frees all objects allocated in initAll()
+ *
+ * @param p particles to be freed
+ * @return 0 in case of success
+ */
+int freeAll(Particles* p);
 
 /**
  * @fn int initParticles(Particles*, Number, Size)
