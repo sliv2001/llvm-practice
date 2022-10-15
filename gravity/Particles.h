@@ -15,6 +15,7 @@
 #define DEFAULT_MAXIMUM_RADIUS			4
 #define MAX_BRIGHTNESS					1000
 #define DEFAULT_WINDOW_CAPTION			"Gravity"
+#define GRAVITY_CONSTANT				1
 
 struct Vector {
 	int x;
@@ -30,6 +31,8 @@ typedef int Brightness;
 
 struct Particle {
 	Origin origin;
+	Velocity velocity;
+	Acceleration accel;
 	Radius radius;
 };
 typedef struct Particle Particle;
