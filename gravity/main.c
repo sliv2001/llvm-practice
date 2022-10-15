@@ -13,7 +13,7 @@ static Particles p;
 int WinMain(int argc, char **argv) {
 
 	initAll(&p, 0, 0, 0, 0);
-	for (int i=0; i<100; i++){
+	for (int i=0; i<10000000; i++){
 		drawParticles(&p);
 		stepParticles(&p);
 	}

@@ -16,7 +16,7 @@
 #define DEFAULT_MAXIMUM_RADIUS			4
 #define MAX_BRIGHTNESS					255
 #define DEFAULT_WINDOW_CAPTION			"Gravity"
-#define GRAVITY_CONSTANT				50
+#define GRAVITY_CONSTANT				20
 
 struct Vector {
 	int x;

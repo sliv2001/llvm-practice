@@ -89,19 +89,19 @@ static int setAcceleration(Particles *p) {
 	for (int i = 0; i < p->number; i++) {
 		if (!exists(&p->base[i]))
 			continue;
-		for (int k = i + 1; k < p->number; k++) {
+		p->base[i].accel.x=0;
+		p->base[i].accel.y=0;
+		for (int k = 0; k < p->number; k++) {
 			if (!exists(&p->base[k]))
+				continue;
+			if (i==k)
 				continue;
 			Particle *p1 = &p->base[i], *p2 = &p->base[k];
 			int distanceX = p2->origin.x - p1->origin.x;
 			int distanceY = p2->origin.y - p1->origin.y;
 			p1->accel.x = SIGN(distanceX) * GRAVITY_CONSTANT * p2->radius
 					/ (SQ(distanceX));
-			p2->accel.x = -1 * SIGN(distanceX) * GRAVITY_CONSTANT * p1->radius
-					/ (SQ(distanceX));
 			p1->accel.y = SIGN(distanceX) * GRAVITY_CONSTANT * p2->radius
-					/ (SQ(distanceY));
-			p2->accel.y = -1 * SIGN(distanceX) * GRAVITY_CONSTANT * p1->radius
 					/ (SQ(distanceY));
 		}
 	}
