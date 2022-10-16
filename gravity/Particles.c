@@ -117,15 +117,21 @@ static int checkBorderIntersection(Particle *p) {
 	Radius r = p->radius;
 	if (!exists(p))
 		return 0;
-	if (o.x <= r && p->velocity.x < 0)
+	if (o.x - r <= 0  && p->velocity.x < 0){
 		p->velocity.x *= -1;
-	if (o.x + r >= window.x && p->velocity.x > 0)
+	}
+	if (o.x + r >= window.x && p->velocity.x > 0){
 		p->velocity.x *= -1;
-	if (o.y <= r && p->velocity.y < 0)
+	}
+	if (o.y - r <= 0 && p->velocity.y < 0){
 		p->velocity.y *= -1;
+	}
 	if (o.y + r >= window.y && p->velocity.y > 0)
 		p->velocity.y *= -1;
-//	printf("%d %d\n", p->origin.x, p->origin.y);
+	if (o.x < 0)
+		p->origin.x=r+1;
+	if (o.y < 0)
+		p->origin.y=r+1;
 	return 0;
 }
 

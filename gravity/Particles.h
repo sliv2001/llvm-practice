@@ -12,14 +12,14 @@
 #include <stdbool.h>
 
 #define	MAX_SIZE_OF_PARTICLES			1000
-#define DEFAULT_NUMBER_OF_PARTICLES		30
+#define DEFAULT_NUMBER_OF_PARTICLES		250
 #define DEFAULT_MAXIMUM_RADIUS			4
 #define MAX_BRIGHTNESS					255
 #define DEFAULT_WINDOW_CAPTION			"Gravity"
 #define GRAVITY_CONSTANT				200000
-#define DYNAMIC_INERTIA					10
+#define DYNAMIC_INERTIA					10000
 #define MAX_VELOCITY					INT_MAX/2-1
-#define KINEMATIC_INERTIA				10000
+#define KINEMATIC_INERTIA				100
 
 struct Vector {
 	int x;
