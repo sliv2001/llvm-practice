@@ -16,6 +16,8 @@
 
 static Canva window;
 
+static int approxSQRT_ofSum(int x, int y);
+
 int initAll(Particles *p, Number n, Radius r_max, int x, int y) {
 	int res;
 	if ((res = initDrawManager(&window, x, y, DEFAULT_WINDOW_CAPTION)))
@@ -85,6 +87,7 @@ int drawParticles(Particles *p) {
 	return 0;
 }
 
+/*Checked.*/
 static int setAcceleration(Particles *p) {
 	for (int i = 0; i < p->number; i++) {
 		if (!exists(&p->base[i]))
@@ -99,10 +102,11 @@ static int setAcceleration(Particles *p) {
 			Particle *p1 = &p->base[i], *p2 = &p->base[k];
 			int distanceX = p2->origin.x - p1->origin.x;
 			int distanceY = p2->origin.y - p1->origin.y;
-			p1->accel.x = SIGN(distanceX) * GRAVITY_CONSTANT * p2->radius
-					/ (SQ(distanceX));
-			p1->accel.y = SIGN(distanceX) * GRAVITY_CONSTANT * p2->radius
-					/ (SQ(distanceY));
+			int dsq=SQ(distanceX)+SQ(distanceY);
+			if (dsq==0) dsq=1;
+			int module = GRAVITY_CONSTANT * p2->radius / (dsq);
+			p1->accel.x += (p2->origin.x-p1->origin.x)*module;
+			p1->accel.y += (p2->origin.y-p1->origin.y)*module;
 		}
 	}
 	return 0;
@@ -121,15 +125,25 @@ static int checkBorderIntersection(Particle *p) {
 		p->velocity.y *= -1;
 	if (o.y + r >= window.y && p->velocity.y > 0)
 		p->velocity.y *= -1;
+//	printf("%d %d\n", p->origin.x, p->origin.y);
 	return 0;
 }
 
+/*Checked except for checkBorderIntersection*/
 static int setVelocity(Particles *p) {
 	for (int i = 0; i < p->number; i++) {
 		if (!exists(&p->base[i]))
 			continue;
-		p->base[i].velocity.x += p->base[i].accel.x;
-		p->base[i].velocity.y += p->base[i].accel.y;
+		p->base[i].velocity.x += p->base[i].accel.x/DYNAMIC_INERTIA;
+		p->base[i].velocity.y += p->base[i].accel.y/DYNAMIC_INERTIA;
+		if (p->base[i].velocity.x>MAX_VELOCITY){
+			p->base[i].velocity.y = MAX_VELOCITY*p->base[i].velocity.y/p->base[i].velocity.x;
+			p->base[i].velocity.x=MAX_VELOCITY;
+		}
+		if (p->base[i].velocity.y>MAX_VELOCITY){
+			p->base[i].velocity.x = MAX_VELOCITY*p->base[i].velocity.x/p->base[i].velocity.y;
+			p->base[i].velocity.y=MAX_VELOCITY;
+		}
 		checkBorderIntersection(&p->base[i]);
 	}
 	return 0;
@@ -142,8 +156,8 @@ static int setOrigin(Particles *p) {
 	for (int i = 0; i < p->number; i++) {
 		if (!exists(&p->base[i]))
 			continue;
-		p->base[i].origin.x += p->base[i].velocity.x;
-		p->base[i].origin.y += p->base[i].velocity.y;
+		p->base[i].origin.x += p->base[i].velocity.x/KINEMATIC_INERTIA;
+		p->base[i].origin.y += p->base[i].velocity.y/KINEMATIC_INERTIA;
 	}
 
 	return 0;
@@ -193,6 +207,6 @@ int stepParticles(Particles *p) {
 	setAcceleration(p);
 	setVelocity(p);
 	setOrigin(p);
-	mergeParticles(p);
+	//	mergeParticles(p);
 	return 0;
 }

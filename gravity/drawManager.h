@@ -26,6 +26,8 @@ typedef struct Canva Canva;
  * @param x If ==0 value is default
  * @param y See x
  * @return 0 in case of success
+ *
+ * Checked.
  */
 int initDrawManager(Canva *c, int x, int y, char *windowCaption);
 

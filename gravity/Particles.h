@@ -12,11 +12,14 @@
 #include <stdbool.h>
 
 #define	MAX_SIZE_OF_PARTICLES			1000
-#define DEFAULT_NUMBER_OF_PARTICLES		25
+#define DEFAULT_NUMBER_OF_PARTICLES		30
 #define DEFAULT_MAXIMUM_RADIUS			4
 #define MAX_BRIGHTNESS					255
 #define DEFAULT_WINDOW_CAPTION			"Gravity"
-#define GRAVITY_CONSTANT				20
+#define GRAVITY_CONSTANT				200000
+#define DYNAMIC_INERTIA					10
+#define MAX_VELOCITY					INT_MAX/2-1
+#define KINEMATIC_INERTIA				10000
 
 struct Vector {
 	int x;
@@ -76,6 +79,8 @@ int freeAll(Particles* p);
  * @param n Maximum number of particles. If ==0 then default value is used
  * @param r_max Maximum initial radius of particle. If ==0 then default value is used
  * @return 0 in case of success
+ *
+ * Checked.
  */
 int initParticles(Particles *p, Number n, Radius r_max);
 
@@ -104,6 +109,8 @@ void drawCircle(Origin o, Radius r, Brightness b);
  *
  * @param p
  * @return 0 in case of success
+ *
+ * Checked.
  */
 int drawParticles(Particles *p);
 
