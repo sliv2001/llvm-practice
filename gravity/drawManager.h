@@ -10,6 +10,7 @@
 
 #define DEFAULT_WIDTH	640
 #define DEFAULT_HEIGHT	480
+#define BCOLOR			20
 
 struct Canva {
 	unsigned x;
