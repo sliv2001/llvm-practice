@@ -17,9 +17,9 @@
 #define MAX_BRIGHTNESS					255
 #define DEFAULT_WINDOW_CAPTION			"Gravity"
 #define GRAVITY_CONSTANT				200000
-#define DYNAMIC_INERTIA					10000
+#define DYNAMIC_INERTIA					25000
 #define MAX_VELOCITY					INT_MAX/2-1
-#define KINEMATIC_INERTIA				100
+#define KINEMATIC_INERTIA				140
 
 struct Vector {
 	int x;
