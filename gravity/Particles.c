@@ -16,8 +16,6 @@
 
 static Canva window;
 
-static int approxSQRT_ofSum(int x, int y);
-
 int initAll(Particles *p, Number n, Radius r_max, int x, int y) {
 	int res;
 	if ((res = initDrawManager(&window, x, y, DEFAULT_WINDOW_CAPTION)))
@@ -175,34 +173,26 @@ static bool intersectParticles(Particle *p1, Particle *p2) {
 	return (dx * dx + dy * dy) <= (rsum * rsum);
 }
 
-static int approxSQRT_ofSum(int x, int y) {
-	int ratio1 = x / y;
-	int average1 = y + (y * ratio1 * ratio1) / 2
-			- (y * ratio1 * ratio1 * ratio1 * ratio1) / 8;
-	int ratio2 = y / x;
-	int average2 = x + (x * ratio2 * ratio2) / 2
-			- (x * ratio2 * ratio2 * ratio2 * ratio2) / 8;
-	return (average1 + average2) / 2;
-}
-
-static int mergeParticle(Particle *p1, Particle *p2) {
-	int newRadius = approxSQRT_ofSum(p1->radius, p2->radius);
-	p1->radius = newRadius;
-	p2->exists=false;
+static int collideParticle(Particle *p1, Particle *p2) {
+	Velocity v=p1->velocity;
+	p1->velocity.x = p2->velocity.x*p2->radius/p1->radius;
+	p1->velocity.y = p2->velocity.y*p2->radius/p1->radius;
+	p2->velocity.x = v.x*p1->radius/p2->radius;
+	p2->velocity.y = v.y*p1->radius/p2->radius;
 	return 0;
 }
 
-static int mergeParticles(Particles *p) {
+static int collideParticles(Particles *p) {
 
 	for (int i = 0; i < p->number; i++) {
 		if (!exists(&p->base[i]))
 			continue;
-		for (int k = i + 1; i < p->number; i++) {
+		for (int k = i+1; i < p->number; i++) {
 			if (!exists(&p->base[k]))
 				continue;
 			Particle *p1 = &p->base[i], *p2 = &p->base[k];
 			if (intersectParticles(p1, p2))
-				mergeParticle(p1, p2);
+				collideParticle(p1, p2);
 		}
 	}
 
@@ -213,6 +203,6 @@ int stepParticles(Particles *p) {
 	setAcceleration(p);
 	setVelocity(p);
 	setOrigin(p);
-	//	mergeParticles(p);
+	collideParticles(p);
 	return 0;
 }

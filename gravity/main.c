@@ -9,7 +9,7 @@
 #include "SDL.h"
 #include "stdio.h"
 
-#define FPS 60
+#define FPS 30
 
 static Particles p;
 
