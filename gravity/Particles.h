@@ -21,6 +21,10 @@
 #define MAX_VELOCITY					INT_MAX/2-1
 #define KINEMATIC_INERTIA				280
 
+#define RANDOM_RANGE(from, to)	rand()%((to)-(from))+(from);
+#define SQ(x)					(x)*(x)
+#define SIGN(x)					((x)>0?1:((x)<0?-1:0))
+
 struct Vector {
 	int x;
 	int y;
@@ -69,39 +73,6 @@ int initAll(Particles *p, Number n, Radius r_max, int x, int y);
  * @return 0 in case of success
  */
 int freeAll(Particles* p);
-
-/**
- * @fn int initParticles(Particles*, Number, Size)
- * @brief Fills Particles object at address p with valid particles. Sets size
- * If Particles.number>0 does nothing
- *
- * @param p
- * @param n Maximum number of particles. If ==0 then default value is used
- * @param r_max Maximum initial radius of particle. If ==0 then default value is used
- * @return 0 in case of success
- *
- * Checked.
- */
-int initParticles(Particles *p, Number n, Radius r_max);
-
-/**
- * @fn int freeParticles(Particles*)
- * @brief If number>0 frees all particles. Otherwise does nothing
- *
- * @param p
- * @return 0 in case of success
- */
-int freeParticles(Particles *p);
-
-/**
- * @fn void drawCircle(Origin, Radius, Brightness)
- * @brief draws particle with given radius and origin
- *
- * @param o
- * @param r
- * @param b
- */
-void drawCircle(Origin o, Radius r, Brightness b);
 
 /**
  * @fn int drawParticles(Particles)

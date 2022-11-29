@@ -6,7 +6,7 @@
  */
 
 #include "Particles.h"
-#include "SDL.h"
+#include <SDL3/SDL.h>
 #include "stdio.h"
 
 #define FPS 30
@@ -39,5 +39,6 @@ int WinMain(int argc, char **argv) {
 		if (breakAll)
 			break;
 	}
+	freeAll(&p);
 	return 0;
 }
