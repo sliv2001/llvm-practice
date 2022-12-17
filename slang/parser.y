@@ -20,6 +20,8 @@ extern "C" {
 //	int yywrap(void){return 1;}
 }
 
+extern FILE* yyin;
+
 llvm::LLVMContext context;
 llvm::IRBuilder<>* builder;
 llvm::Module* module;
@@ -44,7 +46,7 @@ std::map<std::string, llvm::BasicBlock *> BBMap;
 
 %}
 
-%token NUM FUNCTION IF GOTO INTEGER IDENTIFIER
+%token NUM FUNCTION IF GOTO INTEGER IDENTIFIER ELSE
 
 %%
 
@@ -121,12 +123,15 @@ funcCall:	IDENTIFIER '(' ')' ';'	{
 									}
 									;
 									
-ifStatement:	IF expression GOTO IDENTIFIER ';'	{
+ifStatement:	IF expression GOTO IDENTIFIER ELSE GOTO IDENTIFIER ';'	{
 														if (BBMap.find((char*)$4) == BBMap.end()) {
 															BBMap.insert({(char*)$4, llvm::BasicBlock::Create(context, (char*)$4, curFunc)});
 														}
+														if (BBMap.find((char*)$7) == BBMap.end()) {
+															BBMap.insert({(char*)$7, llvm::BasicBlock::Create(context, (char*)$7, curFunc)});
+														}
 														llvm::Value *cond = builder->CreateICmpNE($2, builder->getInt32(0));
-														builder->CreateCondBr(cond, BBMap[(char*)$4], nullptr/*Builder.GetInsertBlock()*/); /*TODO Check this out*/
+														builder->CreateCondBr(cond, BBMap[(char*)$4], BBMap[(char*)$7]); /*TODO Check this out*/
 													}
 									;				
 label:	IDENTIFIER ':'	{
@@ -174,11 +179,11 @@ Factor:     Primary { $$ = $1; }
 ;
 
 Primary:    NUM { $$ = builder->getInt32(atoi((char*)$1)); }
-            | variable { $$ = builder->CreateLoad($1->getType(), $1); }
+            | variable { $$ = builder->CreateLoad(builder->getInt32Ty(), $1); }
 ;
 
 variable:      IDENTIFIER  {
-                            $$ = builder->CreateConstGEP1_32(ValueMap[(char*)$1].irVal->getType(), ValueMap[(char*)$1].irVal, 0);
+                            $$ = builder->CreateConstGEP1_32(builder->getInt32Ty(), ValueMap[(char*)$1].irVal, 0);
                         }
             | IDENTIFIER '[' expression ']' {
                             llvm::ArrayType *arrayType = llvm::ArrayType::get(builder->getInt32Ty(), ArrayMap[(char*)$1].size);
@@ -192,6 +197,13 @@ variable:      IDENTIFIER  {
 %%
 
 int main(int argc, char **argv){
+
+	FILE* inp;
+	if (argc==2){
+		inp=fopen(argv[1], "r");
+		yyin=inp;
+	}
+
 	llvm::InitializeNativeTarget();
 	llvm::InitializeNativeTargetAsmPrinter();
 	
@@ -203,7 +215,7 @@ int main(int argc, char **argv){
 	llvm::outs() << "#[LLVM IR]:\n";
     module->print(llvm::outs(), nullptr);
     
-    llvm::outs() << "Running code...\n";
+    std::cout << "Running code...\n";
 	llvm::ExecutionEngine *ee = llvm::EngineBuilder(std::unique_ptr<llvm::Module>(module)).create();
 
     for (auto& value : ValueMap) {
@@ -225,19 +237,21 @@ int main(int argc, char **argv){
         return -1;
     }
 	ee->runFunction(mainFunc, noargs);
-	llvm::outs() << "Code was run.\n";
+	std::cout << "Code was run.\n";
 
     for (auto& value : ValueMap) {
-        llvm::outs() << value.first << " = " <<  value.second.realVal << "\n";
+        std::cout << value.first << " = " <<  value.second.realVal << "\n";
     }
     for (auto& array : ArrayMap) {
-        llvm::outs() << array.first << "[" << array.second.size << "] =";
+        std::cout << array.first << "[" << array.second.size << "] =";
         for (int i = 0; i < array.second.size; i++) {
-            llvm::outs() << " " << array.second.realVal[i];
+            std::cout << " " << array.second.realVal[i];
         }
-        llvm::outs() << "\n";
+        std::cout << "\n";
         delete array.second.realVal;
     }
     
+    if (argc==2)
+    	fclose(inp);
     return 0;
 }

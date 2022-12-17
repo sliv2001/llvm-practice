@@ -23,6 +23,8 @@ extern "C" void yyerror(char* str);
 				
 "if"						{ /*printf("IfToken\n");*/ return IF; }
 
+"else"						{ return ELSE; }
+
 "goto"						{ /*printf("GotoToken\n");*/ return GOTO; }
 
 "integer"					{ /*printf("integerToken");*/ return INTEGER; }
